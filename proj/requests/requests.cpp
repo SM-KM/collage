@@ -1,5 +1,20 @@
 #include "requests.h"
 #include <curl/curl.h>
+#include <iostream>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
+// Helpers
+
+std::string GetApiKey() {
+  std::string apiKey = std::getenv("TMDB_API_KEY");
+
+  if (apiKey.empty()) {
+    std::cerr << "Api key not found. Exiting. \n";
+  }
+
+  return apiKey;
+}
 
 std::string fetchFromTMDB(const std::string &apiKey, const std::string url) {
   CURL *curl;
@@ -24,4 +39,19 @@ std::string fetchFromTMDB(const std::string &apiKey, const std::string url) {
   }
 
   return readBuffer;
+}
+
+nlohmann::json getLatestPopularMovies() {
+  std::string url =
+      "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    return data["results"];
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+    return nlohmann::json::object();
+  }
 }
