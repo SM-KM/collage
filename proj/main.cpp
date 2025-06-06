@@ -1,10 +1,9 @@
 // TODO: Add loading data from CSV
 // TODO: Add support to load clips or entire movies using mov-cli and in the
 // case of anime just directly get it
-// TODO: Add the ability to rate any video
-// TODO: Save ratings for the videos persistant
-// WARN: Maybe add some kind of registering to know from who are the ratings
-// depending from where we get the data
+// TODO: Add the ability to rate any video TODO: Save ratings for the videos
+// persistant WARN: Maybe add some kind of registering to know from who are the
+// ratings depending from where we get the data
 
 // TODO: Implement search on the movie or series specific id data, and organize
 // on the classes

@@ -8,10 +8,7 @@ void LoadPopularMovies() {
   getLatestPopularMovies();
 }
 
-void LoadPopularSeries() {
-  std::cout << "Ratings of popular movies: \n\n";
-  getLatestPopularSeries();
-}
+void LoadPopularSeries() { getLatestPopularSeries(); }
 
 void LoadVideoSearch(std::string searchStr, std::string type) {
   printf("Searching for: %s [%s]... \n\n", searchStr.c_str(), type.c_str());

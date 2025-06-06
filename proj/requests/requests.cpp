@@ -1,11 +1,12 @@
 #include "requests.h"
+#include <nlohmann/json.hpp>
+#include "../util/videos.h"
+#include "../util/formatting.h"
 #include <curl/curl.h>
 #include <iostream>
-#include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
+#include <vector>
 
 // Helpers
-
 const std::string BASE_REQ = "https://api.themoviedb.org/3/";
 
 std::string GetApiKey() {
@@ -43,32 +44,39 @@ std::string fetchFromTMDB(const std::string &apiKey, const std::string url) {
   return readBuffer;
 }
 
-nlohmann::json getLatestPopularMovies() {
-  std::string url = BASE_REQ + "movie/popular?language=en-US&page=1";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    std::cout << data["results"];
-    return data["results"];
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "JSON parsing error: " << e.what() << "\n";
-    return nlohmann::json::object();
-  }
-}
-
-nlohmann::json getLatestPopularSeries() {
+std::vector<Series> getLatestPopularSeries() {
   std::string url = BASE_REQ + "tv/popular?language=en-US&page=1";
 
   std::string apiKey = GetApiKey();
   std::string response = fetchFromTMDB(apiKey, url);
   try {
     nlohmann::json data = nlohmann::json::parse(response);
-    std::cout << data["results"];
-    return data["results"];
+    if (data.empty() || !data["results"].is_array()) {
+      std::cerr << "Missing data or bad formatting of results for series \n";
+      return {};
+    }
+
+    return formatSeries(data["results"]);
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "json parsing error: " << e.what() << "\n";
+    return {};
+  }
+}
+
+std::vector<Movie> getLatestPopularMovies() {
+  std::string url = BASE_REQ + "movie/popular?language=en-US&page=1";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    if (data.empty() || !data["results"].is_array()) {
+      std::cerr << "Missing data or bad formatting of results for movies \n";
+      return {};
+    }
+    return formatMovies(data["results"]);
   } catch (nlohmann::json::parse_error &e) {
     std::cerr << "JSON parsing error: " << e.what() << "\n";
-    return nlohmann::json::object();
+    return {};
   }
 }

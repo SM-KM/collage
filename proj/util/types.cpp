@@ -1,18 +1,6 @@
 #include "types.h"
 #include <string>
 
-struct CreatedBy {
-  int id;
-  std::string name;
-  std::string profilePath;
-  Gender gender;
-};
-
-struct SeriesGenre {
-  int id;
-  std::string name;
-};
-
 const char *searchTypeToString(SearchType s) {
   switch (s) {
   case MOVIE:

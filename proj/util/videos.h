@@ -3,78 +3,85 @@
 
 #include "types.h"
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <numeric>
 #include <string>
 #include <vector>
 
 class Video {
-protected:
-  int id;
-  int duration;
-  std::string name, genre;
-  std::vector<int> ratings;
+public:
+  int m_id;
+  int m_duration;
+  std::string m_name, m_genre;
+  std::vector<int> m_ratings;
 
 public:
+  Video() {};
   Video(int id, std::string name, int duration, std::string genre)
-      : id(id), name(name), duration(duration), genre(genre) {}
+      : m_id(id), m_name(name), m_duration(duration), m_genre(genre) {}
 
   void addRating(int rating) {
     if (rating >= 1 && rating <= 5)
-      ratings.push_back(rating);
+      m_ratings.push_back(rating);
   }
 
   virtual double getAverageRatings() const {
-    if (ratings.empty())
+    if (m_ratings.empty())
       return 0.0;
 
-    return std::accumulate(ratings.begin(), ratings.end(), 0.0) /
-           ratings.size();
+    return std::accumulate(m_ratings.begin(), m_ratings.end(), 0.0) /
+           m_ratings.size();
   }
 
   virtual void show() const = 0;
-  virtual ~Video();
+  virtual ~Video() = default;
 };
 
 class Movie : public Video {
-  bool adult;
-  std::vector<int> genreIds;
-  std::string backdropPath, posterPath;
-  std::string lang, overview;
-  int voteCount, voteAverage;
+public:
+  bool m_adult;
+  std::vector<int> m_genreIds;
+  std::string m_backdropPath, m_posterPath;
+  std::string m_lang, m_overview;
+  int m_voteCount, m_voteAverage;
 
 public:
+  Movie() : Video() {};
   Movie(int id, std::string name, int duration, std::string genre, bool adult,
         std::vector<int> genreIds, std::string backdropPath,
         std::string posterPath, std::string lang, std::string overview,
         int voteCount, int voteAverage)
       : Video(id, name, duration, genre) {
 
-    this->adult = adult;
-    this->genreIds = genreIds;
-    this->backdropPath = backdropPath;
-    this->posterPath = posterPath;
-    this->lang = lang;
-    this->overview = overview;
-    this->voteCount = voteCount;
-    this->voteAverage = voteAverage;
+    this->m_adult = adult;
+    this->m_genreIds = genreIds;
+    this->m_backdropPath = backdropPath;
+    this->m_posterPath = posterPath;
+    this->m_lang = lang;
+    this->m_overview = overview;
+    this->m_voteCount = voteCount;
+    this->m_voteAverage = voteAverage;
   }
 
   void show() const override {
-    std::cout << "Movie: " << name << " | Genre: " << genre
+    std::cout << "Movie: " << m_name << " | Genre: " << m_genre
               << " | Average rating: " << getAverageRatings() << "\n";
   }
 };
 
 class Episode {
-  int episodeNum;
-  int length;
-  std::string title;
+  int m_episode_num;
+  int m_length;
+  std::string m_title;
 
 public:
 };
 
 class Season {
-  int m_season, m_rating, m_voteAverage;
+  int m_id;
+  int m_season, m_rating, m_voteAverage, m_voteCount;
+  std::string m_posterPath, m_airDate, m_overview, m_status, m_tagline;
   std::vector<Episode> m_episodes;
 
 public:
@@ -86,40 +93,38 @@ public:
 };
 
 class Series : public Video {
-  bool adult, inProduction;
-  std::string overview;
-  std::string backdropPath;
+public:
+  bool m_adult, m_in_production;
+  std::string m_overview;
+  std::string m_backdrop_path;
   std::string m_firstAirDate, m_lastAirDate;
-  std::vector<Season> seasons;
-  std::vector<SeriesGenre> genres;
-  std::vector<std::string> langs;
+  std::vector<Season> m_seasons;
+  std::vector<SeriesGenre> m_genres;
+  std::vector<std::string> m_langs;
 
   int m_episodesAmount, m_seasonsAmount;
 
-public:
+  Series() : Video() {};
   Series(int id, std::string name, int duration, std::string genre)
       : Video(id, name, duration, genre) {}
 
-  void addEpisode(std::string title, int season, int rating) {
-    seasons.emplace_back(title, season, rating);
-  }
-
+  void addEpisode() {}
   double getAverageRatings() const override {
-    if (seasons.empty())
+    if (m_seasons.empty())
       return 0.0;
 
     double sum = 0;
-    for (const auto &e : seasons) {
+    for (const auto &e : m_seasons) {
       sum += e.getRating();
     }
 
-    return sum / seasons.size();
+    return sum / m_seasons.size();
   }
 
   void show() const override {
-    std::cout << "Serie: " << name << " | Genre: " << genre
+    std::cout << "Serie: " << m_name << " | Genre: " << m_genre
               << " | Average rating: " << getAverageRatings() << "\n";
-    for (const auto &e : seasons)
+    for (const auto &e : m_seasons)
       e.show();
   }
 };
