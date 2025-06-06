@@ -34,7 +34,7 @@ public:
   virtual ~Shipping() {};
 };
 
-class Envelope : Shipping {
+class Envelope : public Shipping {
 private:
   double large, wide;
   double extraCost;
@@ -51,7 +51,7 @@ public:
   };
 };
 
-class Package : Shipping {
+class Package : public Shipping {
 private:
   double large, wide, deep;
   double weightKg;
@@ -165,8 +165,7 @@ public:
   void show() { std::cout << x << " " << y << std::endl; }
 };
 
-class Point3D : Point2D {
-
+class Point3D : public Point2D {
 private:
   double z;
 
