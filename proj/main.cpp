@@ -16,6 +16,7 @@
 
 #include "util/argHandlers.h"
 #include "util/dotenv.h"
+#include "util/types.h"
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -39,10 +40,17 @@ void runCommand(const std::vector<std::string> &args) {
     } else {
       std::cerr << "Missing argument for search\n";
     }
-  } else if (args[0] == "-series") {
-    LoadPopularSeries();
-  } else if (args[0] == "-p") {
-    LoadPopularMovies();
+  } else if (args[0] == "-m") {
+    LoadMoviesReq();
+  } else if (args[0] == "-ss") {
+    if (args.size() == 2) {
+      SeriesFlags flag = parseSeriesFlag(args[1]);
+      LoadSeriesReq(flag);
+    } else {
+      // TODO: Add functionality to find full series data from ID
+      std::cerr << "Missing argument for series\n";
+    }
+
   } else if (args[0] == "-v") {
     std::cout << "Verbose mode enabled \n";
     // TODO: Implment the flag

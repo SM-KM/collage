@@ -15,7 +15,11 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
 }
 
 std::string fetchFromTMDB(const std::string &apiKey, const std::string url);
-std::vector<Movie> getLatestPopularMovies();
+
 std::vector<Series> getLatestPopularSeries();
+std::vector<Series> getTopRatedSeries();
+std::vector<Series> getAiringTodaySeries();
+
+std::vector<Movie> getLatestPopularMovies();
 
 #endif // !REQUESTS_H

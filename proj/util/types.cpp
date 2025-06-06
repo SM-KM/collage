@@ -21,3 +21,15 @@ const SearchType searchTypeToEnum(std::string s) {
 
   return MOVIE;
 }
+
+const SeriesFlags parseSeriesFlag(std::string flag) {
+  if (flag == "--toprated") {
+    return SeriesFlags::TOP_RATED;
+  } else if (flag == "--popular") {
+    return SeriesFlags::POPULAR;
+  } else if (flag == "--airing") {
+    return SeriesFlags::AIRING_TODAY;
+  }
+
+  return SeriesFlags::POPULAR;
+}

@@ -57,7 +57,6 @@ std::vector<Series> formatSeries(nlohmann::json &results) {
         season.m_posterPath = s.value("poster_path", "");
         season.m_overview = s.value("overview", "");
         season.m_episodesAmount = s.value("episode_count", 0);
-
         seasons.push_back(season);
       }
 

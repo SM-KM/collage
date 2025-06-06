@@ -4,6 +4,7 @@
 #include <string>
 
 enum Gender { FEM, MASC };
+enum class SeriesFlags { TOP_RATED, POPULAR, AIRING_TODAY };
 
 struct CreatedBy {
   int id;
@@ -18,7 +19,9 @@ struct SeriesGenre {
 };
 
 enum SearchType { MOVIE, SERIES };
+
 const char *searchTypeToString(SearchType s);
 const SearchType searchTypeToEnum(std::string s);
+const SeriesFlags parseSeriesFlag(std::string flag);
 
 #endif // !TYPES_H

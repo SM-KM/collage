@@ -3,8 +3,8 @@
 
 #include "types.h"
 
-void LoadPopularMovies();
+void LoadSeriesReq(SeriesFlags flag);
+void LoadMoviesReq();
 void LoadVideoSearch(std::string searchStr, std::string type);
-void LoadPopularSeries();
 
 #endif // !ARGHANDLERS_H
