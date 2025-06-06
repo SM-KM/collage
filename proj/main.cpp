@@ -9,7 +9,8 @@
 // TODO: Implement search on the movie or series specific id data, and organize
 // on the classes
 
-#include "dotenv.h"
+#include "requests/requests.h"
+#include "util/dotenv.h"
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -25,40 +26,8 @@
 #define PROMPT ">> "
 
 // Get the data from the movies and series from TMCP
-using json = nlohmann::json;
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
-                            std::string *output) {
-  output->append((char *)contents, size * nmemb);
-  return size * nmemb;
-}
-
-std::string fetchFromTMDB(const std::string &apiKey) {
-  CURL *curl;
-  CURLcode res;
-  std::string readBuffer;
-
-  std::string url =
-      "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
-  std::string authHeaderValue = "Authorization: Bearer " + apiKey;
-
-  curl = curl_easy_init();
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-
-    struct curl_slist *headers = NULL;
-    headers = curl_slist_append(headers, "accept: application/json");
-    headers = curl_slist_append(headers, authHeaderValue.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-  }
-
-  return readBuffer;
-}
+std::string url =
+    "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
 
 class Video {
 protected:
@@ -153,11 +122,11 @@ void getLatestPopularMovies() {
     std::cerr << "Api key not found. Exiting. \n";
   }
 
-  std::string response = fetchFromTMDB(apiKey);
+  std::string response = fetchFromTMDB(apiKey, url);
   try {
-    json data = json::parse(response);
+    nlohmann::json data = nlohmann::json::parse(response);
     std::cout << data["results"];
-  } catch (json::parse_error &e) {
+  } catch (nlohmann::json::parse_error &e) {
     std::cerr << "JSON parsing error: " << e.what() << "\n";
   }
 }
@@ -173,6 +142,8 @@ void runCommand(const std::vector<std::string> &args) {
     } else {
       std::cerr << "Missing argument for search\n";
     }
+  } else if (args[0] == "-r") {
+    std::cout << "Ratings for popular movies: \n\n";
   } else if (args[0] == "-v") {
     std::cout << "Verbose mode enabled \n";
     // TODO: Implment the flag
@@ -190,15 +161,12 @@ int main(int argc, char *argv[]) {
   while (true) {
     std::cout << PROMPT;
     std::getline(std::cin, line);
-
     std::istringstream iss(line);
     std::string token;
     std::vector<std::string> args;
-
     while (iss >> token) {
       args.push_back(token);
     }
-
     runCommand(args);
   }
 
