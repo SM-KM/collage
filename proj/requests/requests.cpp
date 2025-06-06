@@ -6,6 +6,8 @@
 
 // Helpers
 
+const std::string BASE_REQ = "https://api.themoviedb.org/3/";
+
 std::string GetApiKey() {
   std::string apiKey = std::getenv("TMDB_API_KEY");
 
@@ -42,13 +44,28 @@ std::string fetchFromTMDB(const std::string &apiKey, const std::string url) {
 }
 
 nlohmann::json getLatestPopularMovies() {
-  std::string url =
-      "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
+  std::string url = BASE_REQ + "movie/popular?language=en-US&page=1";
 
   std::string apiKey = GetApiKey();
   std::string response = fetchFromTMDB(apiKey, url);
   try {
     nlohmann::json data = nlohmann::json::parse(response);
+    std::cout << data["results"];
+    return data["results"];
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+    return nlohmann::json::object();
+  }
+}
+
+nlohmann::json getLatestPopularSeries() {
+  std::string url = BASE_REQ + "tv/popular?language=en-US&page=1";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    std::cout << data["results"];
     return data["results"];
   } catch (nlohmann::json::parse_error &e) {
     std::cerr << "JSON parsing error: " << e.what() << "\n";

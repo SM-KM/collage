@@ -1,6 +1,7 @@
 #ifndef VIDEOS_H
 #define VIDEOS_H
 
+#include "types.h"
 #include <iostream>
 #include <numeric>
 #include <string>
@@ -35,9 +36,28 @@ public:
 };
 
 class Movie : public Video {
+  bool adult;
+  std::vector<int> genreIds;
+  std::string backdropPath, posterPath;
+  std::string lang, overview;
+  int voteCount, voteAverage;
+
 public:
-  Movie(int id, std::string name, int duration, std::string genre)
-      : Video(id, name, duration, genre) {}
+  Movie(int id, std::string name, int duration, std::string genre, bool adult,
+        std::vector<int> genreIds, std::string backdropPath,
+        std::string posterPath, std::string lang, std::string overview,
+        int voteCount, int voteAverage)
+      : Video(id, name, duration, genre) {
+
+    this->adult = adult;
+    this->genreIds = genreIds;
+    this->backdropPath = backdropPath;
+    this->posterPath = posterPath;
+    this->lang = lang;
+    this->overview = overview;
+    this->voteCount = voteCount;
+    this->voteAverage = voteAverage;
+  }
 
   void show() const override {
     std::cout << "Movie: " << name << " | Genre: " << genre
@@ -46,48 +66,60 @@ public:
 };
 
 class Episode {
+  int episodeNum;
+  int length;
   std::string title;
-  int season;
-  int rating;
 
 public:
-  Episode(std::string title, int season, int rating)
-      : title(title), season(season), rating(rating) {}
+};
 
-  int getRating() const { return rating; }
-  void show() const {
-    std::cout << " Episode: " << title << " | Season: " << season
-              << " | Rating: " << rating << "\n";
-  }
+class Season {
+  int m_season, m_rating, m_voteAverage;
+  std::vector<Episode> m_episodes;
+
+public:
+  Season(int season, int rating, std::vector<Episode> episodes)
+      : m_episodes(episodes), m_season(season), m_rating(rating) {}
+
+  int getRating() const { return m_rating; }
+  void show() const {}
 };
 
 class Series : public Video {
-  std::vector<Episode> episodes;
+  bool adult, inProduction;
+  std::string overview;
+  std::string backdropPath;
+  std::string m_firstAirDate, m_lastAirDate;
+  std::vector<Season> seasons;
+  std::vector<SeriesGenre> genres;
+  std::vector<std::string> langs;
+
+  int m_episodesAmount, m_seasonsAmount;
 
 public:
   Series(int id, std::string name, int duration, std::string genre)
       : Video(id, name, duration, genre) {}
 
   void addEpisode(std::string title, int season, int rating) {
-    episodes.emplace_back(title, season, rating);
+    seasons.emplace_back(title, season, rating);
   }
 
   double getAverageRatings() const override {
-    if (episodes.empty())
+    if (seasons.empty())
       return 0.0;
 
     double sum = 0;
-    for (const auto &e : episodes) {
+    for (const auto &e : seasons) {
       sum += e.getRating();
     }
 
-    return sum / episodes.size();
+    return sum / seasons.size();
   }
 
   void show() const override {
     std::cout << "Serie: " << name << " | Genre: " << genre
               << " | Average rating: " << getAverageRatings() << "\n";
-    for (const auto &e : episodes)
+    for (const auto &e : seasons)
       e.show();
   }
 };

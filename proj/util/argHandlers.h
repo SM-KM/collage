@@ -5,5 +5,6 @@
 
 void LoadPopularMovies();
 void LoadVideoSearch(std::string searchStr, std::string type);
+void LoadPopularSeries();
 
 #endif // !ARGHANDLERS_H

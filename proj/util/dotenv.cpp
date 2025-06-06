@@ -17,7 +17,7 @@ void loadDotEnv(const std::string &filename) {
       value.erase(0, value.find_first_not_of(" \t\r\n"));
       value.erase(value.find_last_not_of(" \t\r\n") + 1);
 
-#ifdef _WIN64
+#ifdef _WIN32
       _putenv((key + "=" + value).c_str());
 #else
       setenv(key.c_str(), value.c_str(), 1);

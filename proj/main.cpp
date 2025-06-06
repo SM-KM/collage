@@ -8,6 +8,8 @@
 
 // TODO: Implement search on the movie or series specific id data, and organize
 // on the classes
+// TODO: Create the bash scripts for custom fzf for results and using mov-cli
+// for bringing videos and anime
 
 #include "util/argHandlers.h"
 #include "util/dotenv.h"
@@ -34,6 +36,8 @@ void runCommand(const std::vector<std::string> &args) {
     } else {
       std::cerr << "Missing argument for search\n";
     }
+  } else if (args[0] == "-series") {
+    LoadPopularSeries();
   } else if (args[0] == "-p") {
     LoadPopularMovies();
   } else if (args[0] == "-v") {
