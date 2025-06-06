@@ -6,14 +6,64 @@
 // WARN: Maybe add some kind of registering to know from who are the ratings
 // depending from where we get the data
 
+// TODO: Implement search on the movie or series specific id data, and organize
+// on the classes
+
+#include "dotenv.h"
+#include <cstdlib>
+#include <curl/curl.h>
+#include <curl/easy.h>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <numeric>
+#include <sstream>
 #include <string>
+#include <sys/types.h>
 #include <vector>
+
+#define PROMPT ">> "
+
+// Get the data from the movies and series from TMCP
+using json = nlohmann::json;
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
+                            std::string *output) {
+  output->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+std::string fetchFromTMDB(const std::string &apiKey) {
+  CURL *curl;
+  CURLcode res;
+  std::string readBuffer;
+
+  std::string url =
+      "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
+  std::string authHeaderValue = "Authorization: Bearer " + apiKey;
+
+  curl = curl_easy_init();
+  if (curl) {
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "accept: application/json");
+    headers = curl_slist_append(headers, authHeaderValue.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+
+  return readBuffer;
+}
+
 class Video {
 protected:
   int id;
-  int duration; // In seconds
+  int duration; // in seconds
   std::string name, genre;
   std::vector<int> ratings;
 
@@ -26,7 +76,7 @@ public:
       ratings.push_back(rating);
   }
 
-  double getAverageRatings() const {
+  virtual double getAverageRatings() const {
     if (ratings.empty())
       return 0.0;
 
@@ -49,7 +99,108 @@ public:
   }
 };
 
-class Episode {};
-class Series : public Video {};
+class Episode {
+  std::string title;
+  int season;
+  int rating;
 
-int main(int argc, char *argv[]) { return 0; }
+public:
+  Episode(std::string title, int season, int rating)
+      : title(title), season(season), rating(rating) {}
+
+  int getRating() const { return rating; }
+  void show() const {
+    std::cout << " Episode: " << title << " | Season: " << season
+              << " | Rating: " << rating << "\n";
+  }
+};
+
+class Series : public Video {
+  std::vector<Episode> episodes;
+
+public:
+  Series(int id, std::string name, int duration, std::string genre)
+      : Video(id, name, duration, genre) {}
+
+  void addEpisode(std::string title, int season, int rating) {
+    episodes.emplace_back(title, season, rating);
+  }
+
+  double getAverageRatings() const override {
+    if (episodes.empty())
+      return 0.0;
+
+    double sum = 0;
+    for (const auto &e : episodes) {
+      sum += e.getRating();
+    }
+
+    return sum / episodes.size();
+  }
+
+  void show() const override {
+    std::cout << "Serie: " << name << " | Genre: " << genre
+              << " | Average rating: " << getAverageRatings() << "\n";
+    for (const auto &e : episodes)
+      e.show();
+  }
+};
+
+void getLatestPopularMovies() {
+  std::string apiKey = std::getenv("TMDB_API_KEY");
+
+  if (apiKey.empty()) {
+    std::cerr << "Api key not found. Exiting. \n";
+  }
+
+  std::string response = fetchFromTMDB(apiKey);
+  try {
+    json data = json::parse(response);
+    std::cout << data["results"];
+  } catch (json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+  }
+}
+
+void runCommand(const std::vector<std::string> &args) {
+  if (args.empty())
+    return;
+
+  if (args[0] == "-s" || args[0] == "-search") {
+    if (args.size() > 1) {
+      std::cout << "Searching for: " << args[1] << "\n";
+      // TODO: Implement specific search
+    } else {
+      std::cerr << "Missing argument for search\n";
+    }
+  } else if (args[0] == "-v") {
+    std::cout << "Verbose mode enabled \n";
+    // TODO: Implment the flag
+  } else if (args[0] == "exit" || args[0] == "quit") {
+    std::exit(0);
+  } else {
+    std::cerr << "Unknown command: " << args[0] << "\n";
+  }
+}
+
+int main(int argc, char *argv[]) {
+  loadDotEnv();
+  std::string line;
+
+  while (true) {
+    std::cout << PROMPT;
+    std::getline(std::cin, line);
+
+    std::istringstream iss(line);
+    std::string token;
+    std::vector<std::string> args;
+
+    while (iss >> token) {
+      args.push_back(token);
+    }
+
+    runCommand(args);
+  }
+
+  return 0;
+}
