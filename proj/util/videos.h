@@ -108,7 +108,7 @@ public:
   // From API
 
   int m_id;
-  int m_season, m_voteAverage;
+  int m_season, m_voteAverage, m_episodesAmount;
   std::string m_posterPath, m_airDate, m_overview;
   std::string m_sname;
   std::vector<Episode> m_episodes;
