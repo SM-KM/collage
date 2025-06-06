@@ -2,13 +2,17 @@
 // TODO: Add support to load clips or entire movies using mov-cli and in the
 // case of anime just directly get it
 // TODO: Add the ability to rate any video TODO: Save ratings for the videos
-// persistant WARN: Maybe add some kind of registering to know from who are the
+// persistant
+// WARN: Maybe add some kind of registering to know from who are the
 // ratings depending from where we get the data
 
 // TODO: Implement search on the movie or series specific id data, and organize
 // on the classes
 // TODO: Create the bash scripts for custom fzf for results and using mov-cli
 // for bringing videos and anime
+
+// TODO: Run this program through a Go program, that handles UI with Bubble Tea
+// like terminal.shop
 
 #include "util/argHandlers.h"
 #include "util/dotenv.h"

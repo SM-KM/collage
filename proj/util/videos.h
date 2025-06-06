@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <numeric>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -46,7 +47,6 @@ public:
   std::string m_lang, m_overview;
   int m_voteCount, m_voteAverage;
 
-public:
   Movie() : Video() {};
   Movie(int id, std::string name, int duration, std::string genre, bool adult,
         std::vector<int> genreIds, std::string backdropPath,
@@ -65,9 +65,24 @@ public:
   }
 
   void show() const override {
-    std::cout << "Movie: " << m_name << " | Genre: " << m_genre
-              << " | Average rating: " << getAverageRatings() << "\n";
+    std::cout << "Movie: " << m_name << " (ID: " << m_id << ")\n"
+              << "Duration: " << m_duration << " mins\n"
+              << "Genre: " << m_genre << "\n"
+              << "Adult: " << (m_adult ? "Yes" : "No") << "\n"
+              << "Language: " << m_lang << "\n"
+              << "Overview: " << m_overview << "\n"
+              << "Vote Count: " << m_voteCount << "\n"
+              << "Vote Average: " << m_voteAverage << "\n"
+              << "Average User Rating: " << getAverageRatings() << "\n"
+              << "Backdrop Path: " << m_backdropPath << "\n"
+              << "Poster Path: " << m_posterPath << "\n"
+              << "Genre IDs: ";
+    for (auto id : m_genreIds)
+      std::cout << id << " ";
+    std::cout << "\n\n";
   }
+
+  double getAverageRatings() const override { return 0.0; };
 };
 
 class Episode {
@@ -76,25 +91,45 @@ class Episode {
   std::string m_title;
 
 public:
+  Episode(int num = 0, int length = 0, std::string title = "")
+      : m_episode_num(num), m_length(length), m_title(title) {}
+
+  void show() const {
+    std::cout << "  Episode " << m_episode_num << ": " << m_title << " ("
+              << m_length << " mins)\n";
+  }
 };
 
 class Season {
+public:
+  // Local
+  int m_rating, m_voteCount;
+
+  // From API
+
   int m_id;
-  int m_season, m_rating, m_voteAverage, m_voteCount;
-  std::string m_posterPath, m_airDate, m_overview, m_status, m_tagline;
+  int m_season, m_voteAverage;
+  std::string m_posterPath, m_airDate, m_overview;
+  std::string m_sname;
   std::vector<Episode> m_episodes;
 
-public:
+  Season() {};
   Season(int season, int rating, std::vector<Episode> episodes)
       : m_episodes(episodes), m_season(season), m_rating(rating) {}
 
   int getRating() const { return m_rating; }
-  void show() const {}
+  void show() const {
+    std::cout << "Season " << m_season << " | Rating: " << m_rating << "\n";
+    for (const auto &ep : m_episodes) {
+      ep.show();
+    }
+    std::cout << "\n";
+  }
 };
 
 class Series : public Video {
 public:
-  bool m_adult, m_in_production;
+  bool m_adult;
   std::string m_overview;
   std::string m_backdrop_path;
   std::string m_firstAirDate, m_lastAirDate;
@@ -122,10 +157,26 @@ public:
   }
 
   void show() const override {
-    std::cout << "Serie: " << m_name << " | Genre: " << m_genre
-              << " | Average rating: " << getAverageRatings() << "\n";
-    for (const auto &e : m_seasons)
-      e.show();
+    std::cout << "Series: " << m_name << " (ID: " << m_id << ")\n"
+              << "Genre: " << m_genre << "\n"
+              << "Adult: " << (m_adult ? "Yes" : "No") << "\n"
+              << "Overview: " << m_overview << "\n"
+              << "First Air Date: " << m_firstAirDate << "\n"
+              << "Last Air Date: " << m_lastAirDate << "\n"
+              << "Episodes: " << m_episodesAmount << "\n"
+              << "Seasons: " << m_seasonsAmount << "\n"
+              << "Average Rating: " << getAverageRatings() << "\n"
+              << "Languages: ";
+    for (const auto &lang : m_langs)
+      std::cout << lang << " ";
+    std::cout << "\nGenres: ";
+    for (const auto &genre : m_genres)
+      std::cout << genre.name << " ";
+    std::cout << "\n\n";
+
+    for (const auto &season : m_seasons) {
+      season.show();
+    }
   }
 };
 

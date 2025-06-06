@@ -1,13 +1,8 @@
 #include "argHandlers.h"
 #include "../requests/requests.h"
 #include <cstdio>
-#include <iostream>
 
-void LoadPopularMovies() {
-  std::cout << "Ratings of popular movies: \n\n";
-  getLatestPopularMovies();
-}
-
+void LoadPopularMovies() { getLatestPopularMovies(); }
 void LoadPopularSeries() { getLatestPopularSeries(); }
 
 void LoadVideoSearch(std::string searchStr, std::string type) {
