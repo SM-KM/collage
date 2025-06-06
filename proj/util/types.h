@@ -5,6 +5,7 @@
 
 enum Gender { FEM, MASC };
 enum class SeriesFlags { TOP_RATED, POPULAR, AIRING_TODAY };
+enum class MoviesFlags { TOP_RATED, POPULAR };
 
 struct CreatedBy {
   int id;

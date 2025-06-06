@@ -41,6 +41,7 @@ void runCommand(const std::vector<std::string> &args) {
       std::cerr << "Missing argument for search\n";
     }
   } else if (args[0] == "-m") {
+    // TODO:: Add flag support and search data of movie with ID
     LoadMoviesReq();
   } else if (args[0] == "-ss") {
     if (args.size() == 2) {
