@@ -19,10 +19,16 @@ struct SeriesGenre {
   std::string name;
 };
 
+struct MovieGenre {
+  int id;
+  std::string name;
+};
+
 enum SearchType { MOVIE, SERIES };
 
 const char *searchTypeToString(SearchType s);
 const SearchType searchTypeToEnum(std::string s);
 const SeriesFlags parseSeriesFlag(std::string flag);
+const MoviesFlags parseMoviesFlag(std::string flag);
 
 #endif // !TYPES_H

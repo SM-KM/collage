@@ -4,6 +4,7 @@
 #include "../util/formatting.h"
 #include <curl/curl.h>
 #include <iostream>
+#include <string>
 #include <vector>
 
 // Helpers
@@ -113,6 +114,63 @@ std::vector<Movie> getLatestPopularMovies() {
       return {};
     }
     return formatMovies(data["results"]);
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+    return {};
+  }
+}
+
+std::vector<Movie> getTopRatedMovies() {
+  std::string url = BASE_REQ + "movie/top_rated?language=en-US&page=1";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    if (data.empty() || !data["results"].is_array()) {
+      std::cerr << "Missing data or bad formatting of results for movies \n";
+      return {};
+    }
+    return formatMovies(data["results"]);
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+    return {};
+  }
+}
+
+Movie getMovieById(int id) {
+  std::string url =
+      BASE_REQ + "movie/" + std::to_string(id) + "?language=en-US";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    if (data.empty()) {
+      std::cerr << "Missing data or bad formatting of results for movies \n";
+      return {};
+    }
+
+    return formatMovie(data);
+  } catch (nlohmann::json::parse_error &e) {
+    std::cerr << "JSON parsing error: " << e.what() << "\n";
+    return {};
+  }
+}
+
+Series getSerieById(int id) {
+  std::string url = BASE_REQ + "tv/" + std::to_string(id) + "?language=en-US";
+
+  std::string apiKey = GetApiKey();
+  std::string response = fetchFromTMDB(apiKey, url);
+  try {
+    nlohmann::json data = nlohmann::json::parse(response);
+    if (data.empty()) {
+      std::cerr << "Missing data or bad formatting of results for movies \n";
+      return {};
+    }
+
+    return formatSerie(data);
   } catch (nlohmann::json::parse_error &e) {
     std::cerr << "JSON parsing error: " << e.what() << "\n";
     return {};

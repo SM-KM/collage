@@ -21,5 +21,8 @@ std::vector<Series> getTopRatedSeries();
 std::vector<Series> getAiringTodaySeries();
 
 std::vector<Movie> getLatestPopularMovies();
+std::vector<Movie> getTopRatedMovies();
+Movie getMovieById(int id);
+Series getSerieById(int id);
 
 #endif // !REQUESTS_H

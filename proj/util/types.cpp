@@ -34,4 +34,12 @@ const SeriesFlags parseSeriesFlag(std::string flag) {
   return SeriesFlags::POPULAR;
 }
 
-const MoviesFlags parseMoviesFlag() {}
+const MoviesFlags parseMoviesFlag(std::string flag) {
+  if (flag == "--toprated") {
+    return MoviesFlags::TOP_RATED;
+  } else if (flag == "--popular") {
+    return MoviesFlags::POPULAR;
+  } else {
+    return MoviesFlags::POPULAR;
+  }
+}

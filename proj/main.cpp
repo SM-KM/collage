@@ -34,31 +34,110 @@ void runCommand(const std::vector<std::string> &args) {
   if (args.empty())
     return;
 
-  if (args[0] == "-s" || args[0] == "-search") {
-    if (args.size() > 2) {
-      LoadVideoSearch(args[1], args[2]);
-    } else {
-      std::cerr << "Missing argument for search\n";
-    }
-  } else if (args[0] == "-m") {
-    // TODO:: Add flag support and search data of movie with ID
-    LoadMoviesReq();
-  } else if (args[0] == "-ss") {
-    if (args.size() == 2) {
-      SeriesFlags flag = parseSeriesFlag(args[1]);
-      LoadSeriesReq(flag);
-    } else {
-      // TODO: Add functionality to find full series data from ID
-      std::cerr << "Missing argument for series\n";
-    }
+  for (size_t i = 0; i < args.size(); ++i) {
+    const std::string &arg = args[i];
 
-  } else if (args[0] == "-v") {
-    std::cout << "Verbose mode enabled \n";
-    // TODO: Implment the flag
-  } else if (args[0] == "exit" || args[0] == "quit") {
-    std::exit(0);
-  } else {
-    std::cerr << "Unknown command: " << args[0] << "\n";
+    if (arg == "-s" || arg == "-search") {
+      std::vector<std::string> terms;
+      ++i;
+
+      while (i < args.size() && args[i][0] != '-') {
+        terms.push_back(args[i]);
+        ++i;
+      }
+      --i;
+
+      if (!terms.empty()) {
+        std::string query;
+        for (const auto &word : terms)
+          query += word + " ";
+
+        query.pop_back();
+        LoadVideoSearch(query);
+      } else {
+        std::cerr << "Missing search terms \n";
+      }
+    } else if (arg == "-ss") {
+      std::vector<std::string> flags;
+      std::string id;
+
+      ++i;
+      while (i < args.size() && args[i][0] == '-') {
+        if (args[i] == "-id") {
+          if (i + 1 < args.size()) {
+            id = args[++i];
+          } else {
+            std::cerr << "Missing value for -id \n";
+          }
+        } else {
+          flags.push_back(args[i]);
+        }
+        ++i;
+      }
+      --i;
+
+      if (!flags.empty()) {
+        for (const auto &flagstr : flags) {
+          SeriesFlags flag = parseSeriesFlag(flagstr);
+
+          try {
+            if (!id.empty()) {
+              int movieId = std::stoi(id);
+              LoadSerieById(flag, movieId);
+            } else {
+              LoadSeriesReq(flag);
+            }
+          } catch (const std::exception &e) {
+            std::cerr << "Invalid series id: " << id << " (" << e.what()
+                      << ")\n";
+          }
+        }
+      }
+    } else if (arg == "-m") {
+      std::vector<std::string> flags;
+      std::string id;
+      ++i;
+
+      while (i < args.size() && args[i][0] == '-') {
+        if (args[i] == "-id") {
+          if (i + 1 < args.size()) {
+            id = args[++i];
+          } else {
+            std::cerr << "Missing value for -id \n";
+          }
+        } else {
+          flags.push_back(args[i]);
+        }
+        ++i;
+      }
+      --i;
+
+      if (!flags.empty()) {
+        for (const auto &flagstr : flags) {
+          MoviesFlags flag = parseMoviesFlag(flagstr);
+
+          try {
+
+            if (!id.empty()) {
+              int movieId = std::stoi(id);
+              LoadMovieById(flag, movieId);
+            } else {
+              LoadMoviesReq(flag);
+            }
+          } catch (const std::exception &e) {
+            std::cerr << "Invalid movie id: " << id << " (" << e.what()
+                      << ")\n";
+          }
+        }
+      } else {
+        std::cerr << "Missing movie flag \n";
+      }
+
+    } else if (arg == "exit" || arg == "quit") {
+      std::exit(0);
+    } else if (arg[0] == '-') {
+      std::cerr << "Unknown flag: " << arg << "\n";
+    }
   }
 }
 

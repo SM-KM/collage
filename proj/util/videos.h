@@ -43,6 +43,7 @@ class Movie : public Video {
 public:
   bool m_adult;
   std::vector<int> m_genreIds;
+  std::vector<MovieGenre> m_genres;
   std::string m_backdropPath, m_posterPath;
   std::string m_lang, m_overview;
   int m_voteCount, m_voteAverage;
@@ -79,6 +80,12 @@ public:
               << "Genre IDs: ";
     for (auto id : m_genreIds)
       std::cout << id << " ";
+    std::cout << "\n\n";
+    std::cout << "Genres: ";
+    for (auto g : m_genres) {
+      std::cout << g.id << " ";
+      std::cout << g.name << " ";
+    }
     std::cout << "\n\n";
   }
 
@@ -159,6 +166,7 @@ public:
   void show() const override {
     std::cout << "Series: " << m_name << " (ID: " << m_id << ")\n"
               << "Genre: " << m_genre << "\n"
+              << "Name: " << m_name << "\n"
               << "Adult: " << (m_adult ? "Yes" : "No") << "\n"
               << "Overview: " << m_overview << "\n"
               << "First Air Date: " << m_firstAirDate << "\n"
