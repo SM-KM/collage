@@ -132,7 +132,42 @@ void runCommand(const std::vector<std::string> &args) {
       } else {
         std::cerr << "Missing movie flag \n";
       }
+    } else if (arg == "-r" || arg == "-rate") {
+      std::vector<std::string> flags;
+      std::string id;
 
+      ++i;
+      while (i < args.size() && args[i][0] == '-') {
+        if (args[i] == "-id") {
+          if (i + 1 < args.size()) {
+            id = args[++i];
+          } else {
+            std::cerr << "Missing value for -id \n";
+          }
+        } else {
+          flags.push_back(args[i]);
+        }
+        ++i;
+      }
+      --i;
+
+      if (!flags.empty()) {
+        for (const auto &flagstr : flags) {
+          SeriesFlags flag = parseSeriesFlag(flagstr);
+
+          try {
+            if (!id.empty()) {
+              int movieId = std::stoi(id);
+              LoadSerieById(flag, movieId);
+            } else {
+              LoadSeriesReq(flag);
+            }
+          } catch (const std::exception &e) {
+            std::cerr << "Invalid series id: " << id << " (" << e.what()
+                      << ")\n";
+          }
+        }
+      }
     } else if (arg == "exit" || arg == "quit") {
       std::exit(0);
     } else if (arg[0] == '-') {
