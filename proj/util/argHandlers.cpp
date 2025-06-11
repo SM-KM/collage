@@ -55,8 +55,6 @@ void LoadSeriesReq(SeriesFlags flag) {
 
 void LoadVideoSearch(std::string searchStr) {
   printf("Searching for: %s... \n\n", searchStr.c_str());
-  // TODO: Implement this functionality
-
   system("pwd");
   std::string command = "./search.sh \"" + searchStr + "\"";
   int result = system(command.c_str());

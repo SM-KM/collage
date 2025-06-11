@@ -26,7 +26,7 @@ bool updateRating(std::vector<Entry> entries, const std::string &targetId,
 void updateOrAddRating(const std::filesystem::path &path, const int id,
                        const int rating);
 
-void FindEntryById(int id);
+Entry *FindEntryById(std::vector<Entry> &entries, int targetId);
 std::filesystem::path getMoviesCSVPath();
 std::filesystem::path getSeriesCSVPath();
 #endif // !CSV_H

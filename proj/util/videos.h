@@ -46,13 +46,14 @@ public:
   std::vector<MovieGenre> m_genres;
   std::string m_backdropPath, m_posterPath;
   std::string m_lang, m_overview;
-  int m_voteCount, m_voteAverage;
+  int m_voteCount;
+  double m_voteAverage;
 
   Movie() : Video() {};
   Movie(int id, std::string name, int duration, std::string genre, bool adult,
         std::vector<int> genreIds, std::string backdropPath,
         std::string posterPath, std::string lang, std::string overview,
-        int voteCount, int voteAverage)
+        int voteCount, double voteAverage)
       : Video(id, name, duration, genre) {
 
     this->m_adult = adult;
@@ -143,6 +144,8 @@ public:
   std::vector<Season> m_seasons;
   std::vector<SeriesGenre> m_genres;
   std::vector<std::string> m_langs;
+  double m_voteAverage;
+  int m_voteCount;
 
   int m_episodesAmount, m_seasonsAmount;
 
@@ -173,7 +176,8 @@ public:
               << "Last Air Date: " << m_lastAirDate << "\n"
               << "Episodes: " << m_episodesAmount << "\n"
               << "Seasons: " << m_seasonsAmount << "\n"
-              << "Average Rating: " << getAverageRatings() << "\n"
+              << "Vote count: " << m_voteCount << "\n"
+              << "Average Rating: " << m_voteAverage << "\n"
               << "Languages: ";
     for (const auto &lang : m_langs)
       std::cout << lang << " ";

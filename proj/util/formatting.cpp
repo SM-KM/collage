@@ -1,6 +1,9 @@
 #include "formatting.h"
+#include "csv.h"
 #include "types.h"
 #include "videos.h"
+#include <exception>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -16,8 +19,34 @@ std::vector<Movie> formatMovies(nlohmann::json &results) {
     movie.m_posterPath = item.value("poster_path", "");
     movie.m_backdropPath = item.value("backdrop_path", "");
     movie.m_lang = item.value("original_language", "");
-    movie.m_voteCount = item.value("vote_count", 0);
-    movie.m_voteAverage = item.value("vote_average", 0.0);
+    try {
+      std::vector<Entry> entries = readCSV(getMoviesCSVPath());
+      Entry *entry = FindEntryById(entries, movie.m_id);
+
+      if (entry) {
+        int tmdb_count = item.value("vote_count", 0);
+        double tmdb_rating = item.value("vote_average", 0.0);
+        int total_count = tmdb_count + entry->count;
+        double total_rating =
+            (tmdb_rating * tmdb_count) + (entry->rating * entry->count);
+
+        std::cout << entry->rating << " " << entry->count;
+
+        movie.m_voteCount = total_count;
+        movie.m_voteAverage =
+            total_count > 0 ? total_rating / total_count : 0.0;
+
+        std::cout << movie.m_voteAverage << " " << movie.m_voteCount << "\n";
+
+      } else {
+        movie.m_voteCount = item.value("vote_count", 0);
+        movie.m_voteAverage = item.value("vote_average", 0.0);
+      }
+
+    } catch (const std::exception &e) {
+      std::cerr
+          << "Something went wrong retreiving or finding the entry data \n";
+    }
 
     if (!item.value("genre_ids", nlohmann::json::array()).empty()) {
       for (const auto &id : item["genre_ids"]) {
@@ -41,9 +70,33 @@ Movie formatMovie(nlohmann::json &m) {
   movie.m_posterPath = m.value("poster_path", "");
   movie.m_backdropPath = m.value("backdrop_path", "");
   movie.m_lang = m.value("original_language", "");
-  movie.m_voteCount = m.value("vote_count", 0);
-  movie.m_voteAverage = m.value("vote_average", 0.0);
 
+  try {
+    std::vector<Entry> entries = readCSV(getMoviesCSVPath());
+    Entry *entry = FindEntryById(entries, movie.m_id);
+
+    if (entry) {
+      int tmdb_count = m.value("vote_count", 0);
+      double tmdb_rating = m.value("vote_average", 0.0);
+      int total_count = tmdb_count + entry->count;
+      double total_rating =
+          (tmdb_rating * tmdb_count) + (entry->rating * entry->count);
+
+      std::cout << entry->rating << " " << entry->count;
+
+      movie.m_voteCount = total_count;
+      movie.m_voteAverage = total_count > 0 ? total_rating / total_count : 0.0;
+
+      std::cout << movie.m_voteAverage << " " << movie.m_voteCount << "\n";
+
+    } else {
+      movie.m_voteCount = m.value("vote_count", 0);
+      movie.m_voteAverage = m.value("vote_average", 0.0);
+    }
+
+  } catch (const std::exception &e) {
+    std::cerr << "Something went wrong retreiving or finding the entry data \n";
+  }
   if (!m.value("genre_ids", nlohmann::json::array()).empty()) {
     for (const auto &id : m["genre_ids"]) {
       movie.m_genreIds.push_back(id);
@@ -103,6 +156,17 @@ Series formatSerie(nlohmann::json &s) {
     serie.m_genres = genres;
   }
 
+  std::vector<Entry> entries = readCSV(getSeriesCSVPath());
+  Entry *entry = FindEntryById(entries, serie.m_id);
+
+  if (entry) {
+    serie.m_voteAverage = entry->rating;
+    serie.m_voteCount = entry->count;
+  } else {
+    serie.m_voteAverage = 0.0;
+    serie.m_voteCount = 0;
+  }
+
   if (s.contains("seasons") && s["seasons"].is_array() &&
       !s["seasons"].empty()) {
     std::vector<Season> seasons;
@@ -144,6 +208,17 @@ std::vector<Series> formatSeries(nlohmann::json &results) {
     serie.m_overview = item.value("overview", "");
     serie.m_backdrop_path = item.value("backdrop_path", "");
     serie.m_firstAirDate = item.value("first_air_date", "");
+
+    std::vector<Entry> entries = readCSV(getSeriesCSVPath());
+    Entry *entry = FindEntryById(entries, serie.m_id);
+
+    if (entry) {
+      serie.m_voteAverage = entry->rating;
+      serie.m_voteCount = entry->count;
+    } else {
+      serie.m_voteAverage = 0.0;
+      serie.m_voteCount = 0;
+    }
 
     if (item.contains("last_air_date") && !item["last_air_date"].is_null()) {
       serie.m_lastAirDate = item.value("last_air_date", "");
