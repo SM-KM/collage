@@ -204,7 +204,7 @@ std::vector<Series> formatSeries(nlohmann::json &results) {
   for (const auto &item : results) {
     Series serie;
     serie.m_id = item.value("id", 0);
-    serie.m_name = item.value("title", "");
+    serie.m_name = item.value("name", "");
     serie.m_overview = item.value("overview", "");
     serie.m_backdrop_path = item.value("backdrop_path", "");
     serie.m_firstAirDate = item.value("first_air_date", "");

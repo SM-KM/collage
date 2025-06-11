@@ -69,7 +69,6 @@ public:
   void show() const override {
     std::cout << "Movie: " << m_name << " (ID: " << m_id << ")\n"
               << "Duration: " << m_duration << " mins\n"
-              << "Genre: " << m_genre << "\n"
               << "Adult: " << (m_adult ? "Yes" : "No") << "\n"
               << "Language: " << m_lang << "\n"
               << "Overview: " << m_overview << "\n"
@@ -116,7 +115,8 @@ public:
   // From API
 
   int m_id;
-  int m_season, m_voteAverage, m_episodesAmount;
+  int m_season, m_episodesAmount;
+  double m_voteAverage;
   std::string m_posterPath, m_airDate, m_overview;
   std::string m_sname;
   std::vector<Episode> m_episodes;
@@ -127,7 +127,9 @@ public:
 
   int getRating() const { return m_rating; }
   void show() const {
-    std::cout << "Season " << m_season << " | Rating: " << m_rating << "\n";
+    std::cout << "Season " << m_season
+              << " | Episodes amount: " << m_episodesAmount
+              << " | Vote average: " << m_voteAverage << "\n";
     for (const auto &ep : m_episodes) {
       ep.show();
     }

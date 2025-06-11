@@ -5,6 +5,7 @@
 
 #include "util/argHandlers.h"
 #include "util/dotenv.h"
+#include "util/play.h"
 #include "util/types.h"
 #include <cstdlib>
 #include <curl/curl.h>
@@ -30,10 +31,8 @@ void runCommand(const std::vector<std::string> &args) {
     if (arg == "-s" || arg == "-search") {
       std::vector<std::string> terms;
       ++i;
-
       while (i < args.size() && args[i][0] != '-') {
-        terms.push_back(args[i]);
-        ++i;
+        terms.push_back(args[i++]);
       }
       --i;
 
@@ -41,88 +40,114 @@ void runCommand(const std::vector<std::string> &args) {
         std::string query;
         for (const auto &word : terms)
           query += word + " ";
-
         query.pop_back();
         LoadVideoSearch(query);
       } else {
-        std::cerr << "Missing search terms \n";
+        std::cerr << "Missing search terms\n";
       }
+
     } else if (arg == "-ss") {
       std::vector<std::string> flags;
       std::string id;
+      bool play = false;
 
       ++i;
-      while (i < args.size() && args[i][0] == '-') {
-        if (args[i] == "-id") {
-          if (i + 1 < args.size()) {
-            id = args[++i];
-          } else {
-            std::cerr << "Missing value for -id \n";
-          }
+      while (i < args.size()) {
+        const std::string &next = args[i];
+
+        if (next == "-id" && i + 1 < args.size()) {
+          id = args[++i];
+        } else if (next == "--play") {
+          play = true;
+        } else if (next[0] == '-') {
+          flags.push_back(next);
         } else {
-          flags.push_back(args[i]);
+          --i;
+          break;
         }
         ++i;
       }
       --i;
 
-      if (!flags.empty()) {
-        for (const auto &flagstr : flags) {
+      for (const auto &flagstr : flags) {
+        try {
           SeriesFlags flag = parseSeriesFlag(flagstr);
+          if (!id.empty()) {
+            int serieId = std::stoi(id);
+            LoadSerieById(flag, serieId);
+          } else {
+            LoadSeriesReq(flag);
+          }
+        } catch (const std::exception &e) {
+          std::cerr << "Invalid series flag or id: " << e.what() << "\n";
+        }
+      }
 
+      if (play) {
+        if (!id.empty()) {
           try {
-            if (!id.empty()) {
-              int movieId = std::stoi(id);
-              LoadSerieById(flag, movieId);
-            } else {
-              LoadSeriesReq(flag);
-            }
+            int serieId = std::stoi(id);
+            PlaySeriesById(serieId);
           } catch (const std::exception &e) {
             std::cerr << "Invalid series id: " << id << " (" << e.what()
                       << ")\n";
           }
+        } else {
+          std::cerr << "--play was used but no -id provided\n";
         }
       }
+
     } else if (arg == "-m") {
       std::vector<std::string> flags;
       std::string id;
-      ++i;
+      bool play = false;
 
-      while (i < args.size() && args[i][0] == '-') {
-        if (args[i] == "-id") {
-          if (i + 1 < args.size()) {
-            id = args[++i];
-          } else {
-            std::cerr << "Missing value for -id \n";
-          }
+      ++i;
+      while (i < args.size()) {
+        const std::string &next = args[i];
+
+        if (next == "-id" && i + 1 < args.size()) {
+          id = args[++i];
+        } else if (next == "--play") {
+          play = true;
+        } else if (next[0] == '-') {
+          flags.push_back(next);
         } else {
-          flags.push_back(args[i]);
+          --i;
+          break;
         }
         ++i;
       }
       --i;
 
-      if (!flags.empty()) {
-        for (const auto &flagstr : flags) {
+      for (const auto &flagstr : flags) {
+        try {
           MoviesFlags flag = parseMoviesFlag(flagstr);
+          if (!id.empty()) {
+            int movieId = std::stoi(id);
+            LoadMovieById(flag, movieId);
+          } else {
+            LoadMoviesReq(flag);
+          }
+        } catch (const std::exception &e) {
+          std::cerr << "Invalid movie flag or id: " << e.what() << "\n";
+        }
+      }
 
-          // TODO: Implement a --play flag to pip it into the search.sh
-
+      if (play) {
+        if (!id.empty()) {
           try {
-            if (!id.empty()) {
-              int movieId = std::stoi(id);
-              LoadMovieById(flag, movieId);
-            } else {
-              LoadMoviesReq(flag);
-            }
+            int movieId = std::stoi(id);
+            PlayMovieById(movieId);
           } catch (const std::exception &e) {
             std::cerr << "Invalid movie id: " << id << " (" << e.what()
                       << ")\n";
           }
+        } else {
+          std::cerr << "--play was used but no -id provided\n";
         }
-      } else {
-        std::cerr << "Missing movie flag \n";
       }
+
     } else if (arg == "-r" || arg == "-rate") {
       if (i + 2 < args.size()) {
         std::string idStr = args[++i];
@@ -134,7 +159,7 @@ void runCommand(const std::vector<std::string> &args) {
           int rating = std::stoi(ratingStr);
 
           if (rating < 1 || rating > 10) {
-            std::cerr << "Rating must be between 1 and 10 \n";
+            std::cerr << "Rating must be between 1 and 10\n";
           } else if (typeFlag == "--m") {
             RateMovieById(id, rating);
           } else if (typeFlag == "--ss") {
@@ -145,11 +170,12 @@ void runCommand(const std::vector<std::string> &args) {
           std::cerr << "Invalid ID or rating format: " << e.what() << "\n";
         }
       } else {
-        std::cerr << "Usage: -rate <id> <rating from 1 to 10>\n";
+        std::cerr << "Usage: -rate <id> <rating from 1 to 10> --m|--ss\n";
       }
 
     } else if (arg == "exit" || arg == "quit") {
       std::exit(0);
+
     } else if (arg[0] == '-') {
       std::cerr << "Unknown flag: " << arg << "\n";
     }
