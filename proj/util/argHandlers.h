@@ -10,4 +10,7 @@ void LoadMovieById(MoviesFlags flag, int id);
 void LoadSerieById(SeriesFlags flag, int id);
 void LoadVideoSearch(std::string query);
 
+void RateMovieById(int id, int rating);
+void RateSeriesById(int id, int rating);
+
 #endif // !ARGHANDLERS_H

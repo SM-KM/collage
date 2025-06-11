@@ -6,6 +6,7 @@
 
 std::vector<Movie> formatMovies(nlohmann::json &results) {
   std::vector<Movie> movies;
+
   for (const auto &item : results) {
     Movie movie;
     movie.m_id = item.value("id", 0);

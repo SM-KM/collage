@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <exception>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -116,8 +117,9 @@ void runCommand(const std::vector<std::string> &args) {
         for (const auto &flagstr : flags) {
           MoviesFlags flag = parseMoviesFlag(flagstr);
 
-          try {
+          // TODO: Implement a --play flag to pip it into the search.sh
 
+          try {
             if (!id.empty()) {
               int movieId = std::stoi(id);
               LoadMovieById(flag, movieId);
@@ -133,41 +135,30 @@ void runCommand(const std::vector<std::string> &args) {
         std::cerr << "Missing movie flag \n";
       }
     } else if (arg == "-r" || arg == "-rate") {
-      std::vector<std::string> flags;
-      std::string id;
+      if (i + 2 < args.size()) {
+        std::string idStr = args[++i];
+        std::string ratingStr = args[++i];
+        std::string typeFlag = args[++i];
 
-      ++i;
-      while (i < args.size() && args[i][0] == '-') {
-        if (args[i] == "-id") {
-          if (i + 1 < args.size()) {
-            id = args[++i];
-          } else {
-            std::cerr << "Missing value for -id \n";
+        try {
+          int id = std::stoi(idStr);
+          int rating = std::stoi(ratingStr);
+
+          if (rating < 1 || rating > 10) {
+            std::cerr << "Rating must be between 1 and 10 \n";
+          } else if (typeFlag == "--m") {
+            RateMovieById(id, rating);
+          } else if (typeFlag == "--ss") {
+            RateSeriesById(id, rating);
           }
-        } else {
-          flags.push_back(args[i]);
-        }
-        ++i;
-      }
-      --i;
 
-      if (!flags.empty()) {
-        for (const auto &flagstr : flags) {
-          SeriesFlags flag = parseSeriesFlag(flagstr);
-
-          try {
-            if (!id.empty()) {
-              int movieId = std::stoi(id);
-              LoadSerieById(flag, movieId);
-            } else {
-              LoadSeriesReq(flag);
-            }
-          } catch (const std::exception &e) {
-            std::cerr << "Invalid series id: " << id << " (" << e.what()
-                      << ")\n";
-          }
+        } catch (const std::exception &e) {
+          std::cerr << "Invalid ID or rating format: " << e.what() << "\n";
         }
+      } else {
+        std::cerr << "Usage: -rate <id> <rating from 1 to 10>\n";
       }
+
     } else if (arg == "exit" || arg == "quit") {
       std::exit(0);
     } else if (arg[0] == '-') {
