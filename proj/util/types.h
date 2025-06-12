@@ -4,9 +4,12 @@
 #include <string>
 
 enum Gender { FEM, MASC };
+enum class VideoType { MOVIE, SERIE };
 enum class SeriesFlags { TOP_RATED, POPULAR, AIRING_TODAY };
 enum class MoviesFlags { TOP_RATED, POPULAR };
 
+enum class Flags { TOP_RATED, POPULAR };
+std::string to_string(Flags flag);
 struct CreatedBy {
   int id;
   std::string name;

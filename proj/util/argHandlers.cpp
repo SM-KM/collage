@@ -18,6 +18,8 @@ void RateSeriesById(int id, int rating) {
   updateOrAddRating(getSeriesCSVPath(), id, rating);
 }
 
+void LoadReq(Flags flag) {}
+
 void LoadMoviesReq(MoviesFlags flag) {
   if (flag == MoviesFlags::TOP_RATED) {
     getTopRatedMovies();

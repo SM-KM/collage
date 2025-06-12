@@ -4,6 +4,7 @@
 #include "types.h"
 #include <vector>
 
+void LoadReq(Flags flag);
 void LoadSeriesReq(SeriesFlags flag);
 void LoadMoviesReq(MoviesFlags flag);
 void LoadMovieById(MoviesFlags flag, int id);

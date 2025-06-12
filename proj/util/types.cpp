@@ -43,3 +43,14 @@ const MoviesFlags parseMoviesFlag(std::string flag) {
     return MoviesFlags::POPULAR;
   }
 }
+
+std::string to_string(Flags flag) {
+  switch (flag) {
+  case Flags::TOP_RATED:
+    return "top_rated";
+  case Flags::POPULAR:
+    return "popular";
+  default:
+    return "UNKNOWN";
+  }
+}

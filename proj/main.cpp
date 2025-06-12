@@ -1,8 +1,3 @@
-// TODO: Add support to load clips or entire movies using mov-cli and in the
-// case of anime just directly get it
-// TODO: Run this program through a Go program, that handles UI with Bubble Tea
-// like terminal.shop
-
 #include "util/argHandlers.h"
 #include "util/dotenv.h"
 #include "util/play.h"
@@ -20,6 +15,13 @@
 #include <vector>
 
 #define PROMPT ">> "
+
+// TODO: Filter by genre
+// 	- Get all the genres with its ids for the movies and the series
+// 	- When showing movies or series, filter by the genre selected but
+// 	if it does not exist, get first page from that genre.
+//
+// TODO: Show seasons and episodes data
 
 void runCommand(const std::vector<std::string> &args) {
   if (args.empty())

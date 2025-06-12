@@ -5,6 +5,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 // Helpers
@@ -102,18 +103,29 @@ std::vector<Series> getTopRatedSeries() {
   }
 }
 
-std::vector<Movie> getLatestPopularMovies() {
-  std::string url = BASE_REQ + "movie/popular?language=en-US&page=1";
+std::variant<std::vector<Movie>, std::vector<Series>> getContent(VideoType type,
+                                                                 Flags flag) {
+  std::string url =
+      type == VideoType::MOVIE
+          ? BASE_REQ + "movie/" + to_string(flag) + "?language=en-US&page=1"
+          : BASE_REQ + "tv/" + to_string(flag) + "?language=en-US&page=1";
 
   std::string apiKey = GetApiKey();
   std::string response = fetchFromTMDB(apiKey, url);
+
   try {
     nlohmann::json data = nlohmann::json::parse(response);
     if (data.empty() || !data["results"].is_array()) {
       std::cerr << "Missing data or bad formatting of results for movies \n";
       return {};
     }
-    return formatMovies(data["results"]);
+
+    if (type == VideoType::MOVIE) {
+      return formatMovies(data["results"]);
+    } else {
+      return formatSeries(data["results"]);
+    }
+
   } catch (nlohmann::json::parse_error &e) {
     std::cerr << "JSON parsing error: " << e.what() << "\n";
     return {};

@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
+#include <variant>
 #include <vector>
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
@@ -16,6 +17,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
 
 std::string fetchFromTMDB(const std::string &apiKey, const std::string url);
 
+std::variant<std::vector<Movie>, std::vector<Series>> getContent();
 std::vector<Series> getLatestPopularSeries();
 std::vector<Series> getTopRatedSeries();
 std::vector<Series> getAiringTodaySeries();
