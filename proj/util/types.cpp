@@ -54,3 +54,13 @@ std::string to_string(Flags flag) {
     return "UNKNOWN";
   }
 }
+
+Flags to_flag(std::string flagstr) {
+  if (flagstr == "--popular") {
+    return Flags::POPULAR;
+  } else if (flagstr == "--toprated") {
+    return Flags::TOP_RATED;
+  }
+
+  return Flags::POPULAR;
+}

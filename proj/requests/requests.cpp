@@ -4,11 +4,11 @@
 #include "../util/formatting.h"
 #include <curl/curl.h>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
 
-// Helpers
 const std::string BASE_REQ = "https://api.themoviedb.org/3/";
 
 std::string GetApiKey() {
@@ -46,83 +46,36 @@ std::string fetchFromTMDB(const std::string &apiKey, const std::string url) {
   return readBuffer;
 }
 
-std::vector<Series> getAiringTodaySeries() {
-  std::string url = BASE_REQ + "tv/airing_today?language=en-US&page=1";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty() || !data["results"].is_array()) {
-      std::cerr << "Missing data or bad formatting of results for series \n";
-      return {};
-    }
-
-    return formatSeries(data["results"]);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "json parsing error: " << e.what() << "\n";
-    return {};
-  }
-}
-
-std::vector<Series> getLatestPopularSeries() {
-  std::string url = BASE_REQ + "tv/popular?language=en-US&page=1";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty() || !data["results"].is_array()) {
-      std::cerr << "Missing data or bad formatting of results for series \n";
-      return {};
-    }
-
-    return formatSeries(data["results"]);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "json parsing error: " << e.what() << "\n";
-    return {};
-  }
-}
-
-std::vector<Series> getTopRatedSeries() {
-  std::string url = BASE_REQ + "tv/top_rated?language=en-US&page=1";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty() || !data["results"].is_array()) {
-      std::cerr << "Missing data or bad formatting of results for series \n";
-      return {};
-    }
-
-    return formatSeries(data["results"]);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "json parsing error: " << e.what() << "\n";
-    return {};
-  }
-}
-
-std::variant<std::vector<Movie>, std::vector<Series>> getContent(VideoType type,
-                                                                 Flags flag) {
+std::variant<std::vector<Movie>, std::vector<Series>, Movie, Series>
+getContent(VideoType type, Flags flag, bool byId, std::optional<int> id) {
+  std::string testId = id.has_value() ? std::to_string(id.value()) : "";
+  std::string complement = byId == true ? testId : to_string(flag);
+  std::string paging = byId == true ? "" : "&page=1";
   std::string url =
       type == VideoType::MOVIE
-          ? BASE_REQ + "movie/" + to_string(flag) + "?language=en-US&page=1"
-          : BASE_REQ + "tv/" + to_string(flag) + "?language=en-US&page=1";
+          ? BASE_REQ + "movie/" + complement + "?language=en-US" + paging
+          : BASE_REQ + "tv/" + complement + "?language=en-US" + paging;
 
   std::string apiKey = GetApiKey();
   std::string response = fetchFromTMDB(apiKey, url);
 
   try {
     nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty() || !data["results"].is_array()) {
+    std::cout << data << "\n";
+    if (data.empty()) {
       std::cerr << "Missing data or bad formatting of results for movies \n";
       return {};
     }
 
     if (type == VideoType::MOVIE) {
+      if (byId)
+        return formatMovie(data);
+
       return formatMovies(data["results"]);
-    } else {
+    } else if (type == VideoType::SERIE) {
+      if (byId)
+        return formatSerie(data);
+
       return formatSeries(data["results"]);
     }
 
@@ -130,61 +83,6 @@ std::variant<std::vector<Movie>, std::vector<Series>> getContent(VideoType type,
     std::cerr << "JSON parsing error: " << e.what() << "\n";
     return {};
   }
-}
 
-std::vector<Movie> getTopRatedMovies() {
-  std::string url = BASE_REQ + "movie/top_rated?language=en-US&page=1";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty() || !data["results"].is_array()) {
-      std::cerr << "Missing data or bad formatting of results for movies \n";
-      return {};
-    }
-    return formatMovies(data["results"]);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "JSON parsing error: " << e.what() << "\n";
-    return {};
-  }
-}
-
-Movie getMovieById(int id) {
-  std::string url =
-      BASE_REQ + "movie/" + std::to_string(id) + "?language=en-US";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty()) {
-      std::cerr << "Missing data or bad formatting of results for movies \n";
-      return {};
-    }
-
-    return formatMovie(data);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "JSON parsing error: " << e.what() << "\n";
-    return {};
-  }
-}
-
-Series getSerieById(int id) {
-  std::string url = BASE_REQ + "tv/" + std::to_string(id) + "?language=en-US";
-
-  std::string apiKey = GetApiKey();
-  std::string response = fetchFromTMDB(apiKey, url);
-  try {
-    nlohmann::json data = nlohmann::json::parse(response);
-    if (data.empty()) {
-      std::cerr << "Missing data or bad formatting of results for movies \n";
-      return {};
-    }
-
-    return formatSerie(data);
-  } catch (nlohmann::json::parse_error &e) {
-    std::cerr << "JSON parsing error: " << e.what() << "\n";
-    return {};
-  }
+  return {};
 }

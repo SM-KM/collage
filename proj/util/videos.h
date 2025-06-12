@@ -43,7 +43,7 @@ class Movie : public Video {
 public:
   bool m_adult;
   std::vector<int> m_genreIds;
-  std::vector<MovieGenre> m_genres;
+  std::vector<Genre> m_genres;
   std::string m_backdropPath, m_posterPath;
   std::string m_lang, m_overview;
   int m_voteCount;
@@ -144,7 +144,7 @@ public:
   std::string m_backdrop_path;
   std::string m_firstAirDate, m_lastAirDate;
   std::vector<Season> m_seasons;
-  std::vector<SeriesGenre> m_genres;
+  std::vector<Genre> m_genres;
   std::vector<std::string> m_langs;
   double m_voteAverage;
   int m_voteCount;

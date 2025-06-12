@@ -2,11 +2,12 @@
 #define ARGHANDLERS_H
 
 #include "types.h"
+#include <optional>
 #include <vector>
 
-void LoadReq(Flags flag);
+void LoadReq(VideoType type, Flags flag, bool byId = false,
+             std::optional<int> id = std::nullopt);
 void LoadSeriesReq(SeriesFlags flag);
-void LoadMoviesReq(MoviesFlags flag);
 void LoadMovieById(MoviesFlags flag, int id);
 void LoadSerieById(SeriesFlags flag, int id);
 void LoadVideoSearch(std::string query);

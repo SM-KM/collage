@@ -104,9 +104,9 @@ Movie formatMovie(nlohmann::json &m) {
   }
 
   if (!m.value("genres", nlohmann::json::array()).empty()) {
-    std::vector<MovieGenre> genres;
+    std::vector<Genre> genres;
     for (const auto &i : m["genres"]) {
-      MovieGenre movieGenre;
+      Genre movieGenre;
       movieGenre.id = i["id"];
       movieGenre.name = i["name"];
 
@@ -144,9 +144,9 @@ Series formatSerie(nlohmann::json &s) {
   }
 
   if (s.contains("genres") && s["genres"].is_array() && !s["genres"].empty()) {
-    std::vector<SeriesGenre> genres;
+    std::vector<Genre> genres;
     for (const auto &i : s["genres"]) {
-      SeriesGenre serieGenre;
+      Genre serieGenre;
       serieGenre.id = i.value("id", 0);
       serieGenre.name = i.contains("name") && i["name"].is_string()
                             ? i["name"].get<std::string>()

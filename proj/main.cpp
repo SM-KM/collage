@@ -73,12 +73,11 @@ void runCommand(const std::vector<std::string> &args) {
 
       for (const auto &flagstr : flags) {
         try {
-          SeriesFlags flag = parseSeriesFlag(flagstr);
+          Flags flag = to_flag(flagstr);
           if (!id.empty()) {
-            int serieId = std::stoi(id);
-            LoadSerieById(flag, serieId);
+            LoadReq(VideoType::SERIE, flag, true, std::stoi(id));
           } else {
-            LoadSeriesReq(flag);
+            LoadReq(VideoType::SERIE, flag);
           }
         } catch (const std::exception &e) {
           std::cerr << "Invalid series flag or id: " << e.what() << "\n";
@@ -88,8 +87,7 @@ void runCommand(const std::vector<std::string> &args) {
       if (play) {
         if (!id.empty()) {
           try {
-            int serieId = std::stoi(id);
-            PlaySeriesById(serieId);
+            PlayContentById(std::stoi(id));
           } catch (const std::exception &e) {
             std::cerr << "Invalid series id: " << id << " (" << e.what()
                       << ")\n";
@@ -124,13 +122,12 @@ void runCommand(const std::vector<std::string> &args) {
 
       for (const auto &flagstr : flags) {
         try {
-          MoviesFlags flag = parseMoviesFlag(flagstr);
           if (!id.empty()) {
-            int movieId = std::stoi(id);
-            LoadMovieById(flag, movieId);
+            LoadReq(VideoType::MOVIE, to_flag(flagstr), true, std::stoi(id));
           } else {
-            LoadMoviesReq(flag);
+            LoadReq(VideoType::MOVIE, to_flag(flagstr));
           }
+
         } catch (const std::exception &e) {
           std::cerr << "Invalid movie flag or id: " << e.what() << "\n";
         }
@@ -140,7 +137,7 @@ void runCommand(const std::vector<std::string> &args) {
         if (!id.empty()) {
           try {
             int movieId = std::stoi(id);
-            PlayMovieById(movieId);
+            PlayContentById(movieId);
           } catch (const std::exception &e) {
             std::cerr << "Invalid movie id: " << id << " (" << e.what()
                       << ")\n";

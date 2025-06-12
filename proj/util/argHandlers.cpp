@@ -4,6 +4,7 @@
 #include "types.h"
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 
 // TODO: Implement the rest of the searching, and for the results pop in new
 // buffer and inside fzf for easy searching and data visualization
@@ -18,41 +19,8 @@ void RateSeriesById(int id, int rating) {
   updateOrAddRating(getSeriesCSVPath(), id, rating);
 }
 
-void LoadReq(Flags flag) {}
-
-void LoadMoviesReq(MoviesFlags flag) {
-  if (flag == MoviesFlags::TOP_RATED) {
-    getTopRatedMovies();
-  } else if (flag == MoviesFlags::POPULAR) {
-    getLatestPopularMovies();
-  } else {
-    // Fallback
-    std::cerr << "Didnt parse flag correctly";
-  }
-};
-
-void LoadMovieById(MoviesFlags flag, int id) {
-  std::cout << "Loading movie with ID: " << id
-            << " and flag: " << static_cast<int>(flag) << "\n";
-  getMovieById(id);
-};
-void LoadSerieById(SeriesFlags flag, int id) {
-  std::cout << "loading series with id: " << id
-            << " and flag: " << static_cast<int>(flag) << "\n";
-  getSerieById(id);
-};
-
-void LoadSeriesReq(SeriesFlags flag) {
-  if (flag == SeriesFlags::POPULAR) {
-    getLatestPopularSeries();
-  } else if (flag == SeriesFlags::TOP_RATED) {
-    getTopRatedSeries();
-  } else if (flag == SeriesFlags::AIRING_TODAY) {
-    getAiringTodaySeries();
-  } else {
-    // Fallback
-    std::cerr << "Didnt parse flag correctly";
-  }
+void LoadReq(VideoType type, Flags flag, bool byId, std::optional<int> id) {
+  getContent(type, flag, byId, id);
 }
 
 void LoadVideoSearch(std::string searchStr) {

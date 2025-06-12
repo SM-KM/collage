@@ -10,6 +10,8 @@ enum class MoviesFlags { TOP_RATED, POPULAR };
 
 enum class Flags { TOP_RATED, POPULAR };
 std::string to_string(Flags flag);
+Flags to_flag(std::string flagstr);
+
 struct CreatedBy {
   int id;
   std::string name;
@@ -17,12 +19,7 @@ struct CreatedBy {
   Gender gender;
 };
 
-struct SeriesGenre {
-  int id;
-  std::string name;
-};
-
-struct MovieGenre {
+struct Genre {
   int id;
   std::string name;
 };
