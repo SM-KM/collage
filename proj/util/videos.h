@@ -144,6 +144,7 @@ public:
   std::string m_backdrop_path;
   std::string m_firstAirDate, m_lastAirDate;
   std::vector<Season> m_seasons;
+  std::vector<int> m_genreIds;
   std::vector<Genre> m_genres;
   std::vector<std::string> m_langs;
   double m_voteAverage;
@@ -186,6 +187,10 @@ public:
     std::cout << "\nGenres: ";
     for (const auto &genre : m_genres)
       std::cout << genre.name << " ";
+    std::cout << "\n\n";
+    std::cout << "Genre IDs: ";
+    for (auto id : m_genreIds)
+      std::cout << id << " ";
     std::cout << "\n\n";
 
     for (const auto &season : m_seasons) {

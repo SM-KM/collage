@@ -1,12 +1,16 @@
+#include "requests/requests.h"
 #include "util/argHandlers.h"
 #include "util/dotenv.h"
 #include "util/play.h"
 #include "util/types.h"
+#include "util/utils.hpp"
+#include <algorithm>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <exception>
 #include <iostream>
+#include <map>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <sstream>
@@ -16,14 +20,8 @@
 
 #define PROMPT ">> "
 
-// TODO: Filter by genre
-// 	- Get all the genres with its ids for the movies and the series
-// 	- When showing movies or series, filter by the genre selected but
-// 	if it does not exist, get first page from that genre.
-//
-// TODO: Show seasons and episodes data
-
-void runCommand(const std::vector<std::string> &args) {
+void runCommand(const std::vector<std::string> &args,
+                const std::map<std::string, std::vector<Genre>> &genres) {
   if (args.empty())
     return;
 
@@ -51,7 +49,9 @@ void runCommand(const std::vector<std::string> &args) {
     } else if (arg == "-ss") {
       std::vector<std::string> flags;
       std::string id;
+      int genreId = -1;
       bool play = false;
+      std::string genreName;
 
       ++i;
       while (i < args.size()) {
@@ -61,6 +61,14 @@ void runCommand(const std::vector<std::string> &args) {
           id = args[++i];
         } else if (next == "--play") {
           play = true;
+        } else if (next == "--genre") {
+          if (i + 1 < args.size()) {
+            genreName = args[++i];
+            flags.push_back(next);
+          } else {
+            std::cerr << "Error: --genre flag requires a genre name.\n";
+            return;
+          }
         } else if (next[0] == '-') {
           flags.push_back(next);
         } else {
@@ -71,11 +79,37 @@ void runCommand(const std::vector<std::string> &args) {
       }
       --i;
 
+      if (!genreName.empty()) {
+        std::vector<Genre> relevantGenres = genres.at("series");
+
+        try {
+          auto it =
+              std::find_if(relevantGenres.begin(), relevantGenres.end(),
+                           [&](const Genre &g) {
+                             return to_lower(g.name) == to_lower(genreName);
+                           });
+
+          if (it != relevantGenres.end()) {
+            genreId = it->id;
+          } else {
+            std::cerr << "Unknown genre for this type: " << genreName << "\n";
+            return;
+          }
+
+        } catch (const std::out_of_range &e) {
+          std::cerr << "Genre list not found for this type\n";
+          return;
+        }
+      }
+
       for (const auto &flagstr : flags) {
+        std::cout << flagstr << "\n";
         try {
           Flags flag = to_flag(flagstr);
           if (!id.empty()) {
             LoadReq(VideoType::SERIE, flag, true, std::stoi(id));
+          } else if (genreId != -1) {
+            LoadReq(VideoType::SERIE, flag, false, 0, genreId);
           } else {
             LoadReq(VideoType::SERIE, flag);
           }
@@ -100,7 +134,9 @@ void runCommand(const std::vector<std::string> &args) {
     } else if (arg == "-m") {
       std::vector<std::string> flags;
       std::string id;
+      int genreId = -1;
       bool play = false;
+      std::string genreName;
 
       ++i;
       while (i < args.size()) {
@@ -110,6 +146,14 @@ void runCommand(const std::vector<std::string> &args) {
           id = args[++i];
         } else if (next == "--play") {
           play = true;
+        } else if (next == "--genre") {
+          if (i + 1 < args.size()) {
+            genreName = args[++i];
+            flags.push_back(next);
+          } else {
+            std::cerr << "Error: --genre flag requires a genre name.\n";
+            return;
+          }
         } else if (next[0] == '-') {
           flags.push_back(next);
         } else {
@@ -120,12 +164,37 @@ void runCommand(const std::vector<std::string> &args) {
       }
       --i;
 
+      if (!genreName.empty()) {
+        std::vector<Genre> relevantGenres = genres.at("movies");
+
+        try {
+          auto it =
+              std::find_if(relevantGenres.begin(), relevantGenres.end(),
+                           [&](const Genre &g) { return g.name == genreName; });
+
+          if (it != relevantGenres.end()) {
+            std::cout << genreId << "\n";
+            genreId = it->id;
+          } else {
+            std::cerr << "Unknown genre for this type: " << genreName << "\n";
+            return;
+          }
+
+        } catch (const std::out_of_range &e) {
+          std::cerr << "Genre list not found for this type\n";
+          return;
+        }
+      }
+
       for (const auto &flagstr : flags) {
         try {
+          Flags flag = to_flag(flagstr);
           if (!id.empty()) {
-            LoadReq(VideoType::MOVIE, to_flag(flagstr), true, std::stoi(id));
+            LoadReq(VideoType::MOVIE, flag, true, std::stoi(id));
+          } else if (genreId != -1) {
+            LoadReq(VideoType::MOVIE, flag, false, 0, genreId);
           } else {
-            LoadReq(VideoType::MOVIE, to_flag(flagstr));
+            LoadReq(VideoType::MOVIE, flag);
           }
 
         } catch (const std::exception &e) {
@@ -160,9 +229,9 @@ void runCommand(const std::vector<std::string> &args) {
           if (rating < 1 || rating > 10) {
             std::cerr << "Rating must be between 1 and 10\n";
           } else if (typeFlag == "--m") {
-            RateMovieById(id, rating);
+            RateContent(id, rating, VideoType::MOVIE);
           } else if (typeFlag == "--ss") {
-            RateSeriesById(id, rating);
+            RateContent(id, rating, VideoType::SERIE);
           }
 
         } catch (const std::exception &e) {
@@ -172,11 +241,26 @@ void runCommand(const std::vector<std::string> &args) {
         std::cerr << "Usage: -rate <id> <rating from 1 to 10> --m|--ss\n";
       }
 
+    } else if (arg == "-genres") {
+      if (genres.empty()) {
+        std::cerr << "No se pudieron obtener los géneros.\n";
+        return;
+      }
+
+      std::cout << "\nMovie Genres:\n";
+      for (const auto &genre : genres.at("movies")) {
+        std::cout << "  • [" << genre.id << "] " << genre.name << "\n";
+      }
+
+      std::cout << "\nSeries Genres:\n";
+      for (const auto &genre : genres.at("series")) {
+        std::cout << "  • [" << genre.id << "] " << genre.name << "\n";
+      }
+
+      std::cout << std::endl;
+
     } else if (arg == "exit" || arg == "quit") {
       std::exit(0);
-
-    } else if (arg[0] == '-') {
-      std::cerr << "Unknown flag: " << arg << "\n";
     }
   }
 }
@@ -184,6 +268,7 @@ void runCommand(const std::vector<std::string> &args) {
 int main(int argc, char *argv[]) {
   loadDotEnv();
   std::string line;
+  std::map<std::string, std::vector<Genre>> genres = getAllGenres();
 
   while (true) {
     std::cout << PROMPT;
@@ -194,7 +279,8 @@ int main(int argc, char *argv[]) {
     while (iss >> token) {
       args.push_back(token);
     }
-    runCommand(args);
+
+    runCommand(args, genres);
   }
 
   return 0;

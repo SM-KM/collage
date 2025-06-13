@@ -1,6 +1,8 @@
 #ifndef CSV_H
 #define CSV_H
 
+#include "types.h"
+#include "videos.h"
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -27,6 +29,6 @@ void updateOrAddRating(const std::filesystem::path &path, const int id,
                        const int rating);
 
 Entry *FindEntryById(std::vector<Entry> &entries, int targetId);
-std::filesystem::path getMoviesCSVPath();
-std::filesystem::path getSeriesCSVPath();
+std::filesystem::path getCSVPath(VideoType type);
+
 #endif // !CSV_H

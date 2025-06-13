@@ -3,6 +3,7 @@
 
 #include "videos.h"
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 
 std::vector<Movie> formatMovies(nlohmann::json &results);
 std::vector<Series> formatSeries(nlohmann::json &results);

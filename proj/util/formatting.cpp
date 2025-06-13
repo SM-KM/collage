@@ -20,7 +20,7 @@ std::vector<Movie> formatMovies(nlohmann::json &results) {
     movie.m_backdropPath = item.value("backdrop_path", "");
     movie.m_lang = item.value("original_language", "");
     try {
-      std::vector<Entry> entries = readCSV(getMoviesCSVPath());
+      std::vector<Entry> entries = readCSV(getCSVPath(VideoType::MOVIE));
       Entry *entry = FindEntryById(entries, movie.m_id);
 
       if (entry) {
@@ -72,7 +72,7 @@ Movie formatMovie(nlohmann::json &m) {
   movie.m_lang = m.value("original_language", "");
 
   try {
-    std::vector<Entry> entries = readCSV(getMoviesCSVPath());
+    std::vector<Entry> entries = readCSV(getCSVPath(VideoType::MOVIE));
     Entry *entry = FindEntryById(entries, movie.m_id);
 
     if (entry) {
@@ -156,7 +156,7 @@ Series formatSerie(nlohmann::json &s) {
     serie.m_genres = genres;
   }
 
-  std::vector<Entry> entries = readCSV(getSeriesCSVPath());
+  std::vector<Entry> entries = readCSV(getCSVPath(VideoType::SERIE));
   Entry *entry = FindEntryById(entries, serie.m_id);
 
   if (entry) {
@@ -209,7 +209,7 @@ std::vector<Series> formatSeries(nlohmann::json &results) {
     serie.m_backdrop_path = item.value("backdrop_path", "");
     serie.m_firstAirDate = item.value("first_air_date", "");
 
-    std::vector<Entry> entries = readCSV(getSeriesCSVPath());
+    std::vector<Entry> entries = readCSV(getCSVPath(VideoType::SERIE));
     Entry *entry = FindEntryById(entries, serie.m_id);
 
     if (entry) {
@@ -241,6 +241,12 @@ std::vector<Series> formatSeries(nlohmann::json &results) {
       }
 
       serie.m_seasons = seasons;
+    }
+
+    if (!item.value("genre_ids", nlohmann::json::array()).empty()) {
+      for (const auto &id : item["genre_ids"]) {
+        serie.m_genreIds.push_back(id);
+      }
     }
 
     serie.show();

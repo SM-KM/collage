@@ -1,4 +1,5 @@
 #include "csv.h"
+#include "types.h"
 #include <exception>
 #include <fstream>
 #include <ios>
@@ -8,6 +9,14 @@
 #include <unordered_map>
 #include <vector>
 #include <filesystem>
+
+std::filesystem::path getCSVPath(VideoType type) {
+  std::filesystem::path csvDir = "csv";
+  std::filesystem::path filename =
+      type == VideoType::MOVIE ? "movies.csv" : "series.csv";
+  std::filesystem::path path = csvDir / filename;
+  return path;
+}
 
 std::filesystem::path getMoviesCSVPath() {
   std::filesystem::path csvDir = "csv";

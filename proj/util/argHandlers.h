@@ -6,13 +6,12 @@
 #include <vector>
 
 void LoadReq(VideoType type, Flags flag, bool byId = false,
-             std::optional<int> id = std::nullopt);
-void LoadSeriesReq(SeriesFlags flag);
-void LoadMovieById(MoviesFlags flag, int id);
-void LoadSerieById(SeriesFlags flag, int id);
-void LoadVideoSearch(std::string query);
+             std::optional<int> id = std::nullopt,
+             std::optional<int> genreId = std::nullopt);
 
-void RateMovieById(int id, int rating);
-void RateSeriesById(int id, int rating);
+void LoadVideoSearch(std::string query);
+void LoadGenresReq();
+
+void RateContent(int id, int rating, VideoType type);
 
 #endif // !ARGHANDLERS_H

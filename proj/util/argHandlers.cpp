@@ -6,21 +6,14 @@
 #include <cstdlib>
 #include <optional>
 
-// TODO: Implement the rest of the searching, and for the results pop in new
-// buffer and inside fzf for easy searching and data visualization
-
-void RateMovieById(int id, int rating) {
+void RateContent(int id, int rating, VideoType type) {
   std::cout << "Rating movie: " << id << " with: " << rating << "\n";
-  updateOrAddRating(getMoviesCSVPath(), id, rating);
+  updateOrAddRating(getCSVPath(type), id, rating);
 };
 
-void RateSeriesById(int id, int rating) {
-  std::cout << "Rating series: " << id << " with: " << rating << "\n";
-  updateOrAddRating(getSeriesCSVPath(), id, rating);
-}
-
-void LoadReq(VideoType type, Flags flag, bool byId, std::optional<int> id) {
-  getContent(type, flag, byId, id);
+void LoadReq(VideoType type, Flags flag, bool byId, std::optional<int> id,
+             std::optional<int> genreId) {
+  getContent(type, flag, byId, id, genreId);
 }
 
 void LoadVideoSearch(std::string searchStr) {

@@ -20,6 +20,9 @@ std::string fetchFromTMDB(const std::string &apiKey, const std::string url);
 
 std::variant<std::vector<Movie>, std::vector<Series>, Movie, Series>
 getContent(VideoType type, Flags flag, bool byId = false,
-           std::optional<int> id = std::nullopt);
+           std::optional<int> id = std::nullopt,
+           std::optional<int> genreId = std::nullopt);
+
+std::map<std::string, std::vector<Genre>> getAllGenres();
 
 #endif // !REQUESTS_H

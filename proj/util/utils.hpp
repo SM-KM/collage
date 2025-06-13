@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <algorithm>
 #include <boost/pfr.hpp>
 #include <boost/pfr/core.hpp>
 #include <iostream>
@@ -11,4 +12,12 @@ template <typename T> void showProperties(const T &obj) {
     std::cout << "Field " << idx << ": " << field << "\n";
   });
 }
+
+std::string to_lower(const std::string &str) {
+  std::string lower = str;
+  std::transform(lower.begin(), lower.end(), lower.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return lower;
+}
+
 #endif // !UTILS_H
